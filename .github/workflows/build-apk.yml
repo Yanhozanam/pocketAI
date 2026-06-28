@@ -48,6 +48,22 @@ jobs:
           git clone --depth 1 https://github.com/ggml-org/llama.cpp "$CPP_DIR"
           echo "LLAMA_CPP_DIR=$CPP_DIR" >> $GITHUB_ENV
 
+      - name: Patch llamafu build.gradle for AGP 8.11 compatibility
+        run: |
+          LLAMAFU_BUILD="$HOME/.pub-cache/hosted/pub.dev/llamafu-0.1.0/android/build.gradle"
+          if [ -f "$LLAMAFU_BUILD" ]; then
+            echo "Patching $LLAMAFU_BUILD"
+            sed -i 's/compileSdkVersion 34/compileSdk 34/' "$LLAMAFU_BUILD"
+            sed -i 's/minSdkVersion 21/minSdk 21/' "$LLAMAFU_BUILD"
+            sed -i 's/targetSdkVersion 33/targetSdk 33/' "$LLAMAFU_BUILD"
+            sed -i 's/VERSION_1_8/VERSION_17/' "$LLAMAFU_BUILD"
+            sed -i "s|jvmTarget = '1.8'|jvmTarget = '17'|" "$LLAMAFU_BUILD"
+            grep -n "namespace\|compileSdk\|minSdk\|targetSdk\|jvmTarget" "$LLAMAFU_BUILD"
+          else
+            echo "WARNING: llamafu build.gradle not found at $LLAMAFU_BUILD"
+            find "$HOME/.pub-cache" -name "build.gradle" -path "*/llamafu*" 2>/dev/null
+          fi
+
       - name: Build APK
         run: flutter build apk --release
 
