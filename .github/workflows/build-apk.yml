@@ -125,6 +125,11 @@ jobs:
           sed -i '/^set(LLAMA_BUILD_EXAMPLES OFF)/a set(LLAMA_CURL OFF)' "$LLAMAFU_CMAKE"
           sed -i '/^        ggml$/a\        mtmd' "$LLAMAFU_CMAKE"
 
+          # Patch llama-mmap.cpp for NDK 27: posix_madvise -> madvise
+          LLAMA_MMAP="$LLAMA_CPP_DIR/src/llama-mmap.cpp"
+          echo "Patching llama-mmap.cpp at: $LLAMA_MMAP"
+          sed -i 's/posix_madvise/madvise/g; s/POSIX_MADV_WILLNEED/MADV_WILLNEED/g; s/POSIX_MADV_RANDOM/MADV_RANDOM/g' "$LLAMA_MMAP"
+
       - name: Build APK
         run: flutter build apk --release
 
