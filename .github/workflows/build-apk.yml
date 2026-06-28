@@ -121,10 +121,10 @@ jobs:
           echo "Patching CMakeLists.txt at: $LLAMAFU_CMAKE"
           sed -i 's/set(GGML_STATIC ON)/set(GGML_STATIC OFF)/' "$LLAMAFU_CMAKE"
 
-          # Patch llama-mmap.cpp for NDK 27 compatibility (POSIX_MADV_* undeclared in Bionic)
+          # Patch llama-mmap.cpp for NDK 27 Bionic compat (posix_madvise and its constants not available)
           LLAMA_MMAP="$LLAMA_CPP_DIR/src/llama-mmap.cpp"
           echo "Patching llama-mmap.cpp at: $LLAMA_MMAP"
-          sed -i 's/POSIX_MADV_WILLNEED/3/g; s/POSIX_MADV_RANDOM/1/g' "$LLAMA_MMAP"
+          sed -i 's/posix_madvise/madvise/g; s/POSIX_MADV_WILLNEED/MADV_WILLNEED/g; s/POSIX_MADV_RANDOM/MADV_RANDOM/g' "$LLAMA_MMAP"
 
       - name: Build APK
         run: flutter build apk --release
