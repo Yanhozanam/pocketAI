@@ -1,0 +1,60 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/chat_provider.dart';
+import 'providers/model_provider.dart';
+import 'services/cache_manager.dart';
+import 'services/model_manager.dart';
+import 'services/storage_service.dart';
+import 'screens/chat_screen.dart';
+import 'screens/download_screen.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final storage = StorageService();
+  await storage.init();
+
+  await CacheManager().cleanOnStartup();
+
+  await ModelManager().initialize();
+
+  runApp(const PocketAIApp());
+}
+
+class PocketAIApp extends StatelessWidget {
+  const PocketAIApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => ModelProvider()),
+      ],
+      child: MaterialApp(
+        title: 'PocketAI',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          brightness: Brightness.dark,
+          colorSchemeSeed: const Color(0xFF00A884),
+          scaffoldBackgroundColor: const Color(0xFF111B21),
+        ),
+        home: const _AppEntry(),
+      ),
+    );
+  }
+}
+
+class _AppEntry extends StatelessWidget {
+  const _AppEntry();
+
+  @override
+  Widget build(BuildContext context) {
+    final modelReady = ModelManager().isReady;
+    if (modelReady) {
+      return const ChatScreen();
+    }
+    return const DownloadScreen();
+  }
+}

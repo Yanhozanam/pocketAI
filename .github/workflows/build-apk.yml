@@ -1,0 +1,58 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.4"
+          channel: "stable"
+          cache: true
+
+      - name: Accept Android licenses
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
+
+      - name: Get Flutter packages
+        run: flutter pub get
+
+      - name: Find pub cache and clone llama.cpp
+        run: |
+          PUB_CACHE_DIR="${PUB_CACHE:-$HOME/.pub-cache}"
+          LLAMAFU_DIR=$(find "$PUB_CACHE_DIR" -type d -name "llamafu-*" 2>/dev/null | head -1)
+          echo "llamafu found at: $LLAMAFU_DIR"
+          if [ -n "$LLAMAFU_DIR" ]; then
+            CPP_DIR="$(dirname "$(dirname "$LLAMAFU_DIR")")/llama.cpp"
+          else
+            CPP_DIR="$PUB_CACHE_DIR/hosted/pub.dev/llama.cpp"
+          fi
+          echo "Cloning llama.cpp to: $CPP_DIR"
+          git clone --depth 1 https://github.com/ggml-org/llama.cpp "$CPP_DIR"
+          echo "LLAMA_CPP_DIR=$CPP_DIR" >> $GITHUB_ENV
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-ai-apk
+          path: build/app/outputs/flutter-apk/*.apk

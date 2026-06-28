@@ -1,0 +1,177 @@
+import 'package:flutter/material.dart';
+import '../services/device_info.dart';
+import '../services/storage_service.dart';
+import 'chat_screen.dart';
+
+class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  bool _checking = true;
+  int _ramMB = 0;
+  int _freeStorageMB = 0;
+  String _recommendedModel = 'lite';
+  bool _storageSufficient = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _performCheck();
+  }
+
+  Future<void> _performCheck() async {
+    final info = await DeviceInfo.detect();
+    final recommended = info.recommendedModelTier;
+
+    setState(() {
+      _ramMB = info.ramMB;
+      _freeStorageMB = info.freeStorageMB;
+      _recommendedModel = recommended;
+      _storageSufficient = info.freeStorageMB >= 400;
+      _checking = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_checking) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Spacer(flex: 2),
+              Icon(
+                Icons.auto_awesome,
+                size: 80,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'PocketAI',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Your offline study companion',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const Spacer(flex: 1),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Device Compatibility Check',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _infoRow(
+                        context,
+                        'RAM',
+                        '${_ramMB}MB',
+                        _ramMB >= 4096,
+                      ),
+                      const SizedBox(height: 8),
+                      _infoRow(
+                        context,
+                        'Free Storage',
+                        '${_freeStorageMB}MB',
+                        _freeStorageMB >= 400,
+                      ),
+                      const SizedBox(height: 8),
+                      _infoRow(
+                        context,
+                        'Recommendation',
+                        _recommendedModel == 'standard'
+                            ? 'Standard (900MB)'
+                            : 'Lite (400MB)',
+                        _storageSufficient,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (!_storageSufficient)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Low storage detected. Only Lite mode available.',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 13,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              const Spacer(flex: 2),
+              FilledButton(
+                onPressed: _onContinue,
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text('Continue'),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(BuildContext context, String label, String value, bool ok) {
+    return Row(
+      children: [
+        Icon(
+          ok ? Icons.check_circle : Icons.warning,
+          size: 20,
+          color: ok ? Colors.green : Colors.orange,
+        ),
+        const SizedBox(width: 12),
+        Text(
+          '$label: ',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onContinue() async {
+    final storage = StorageService();
+    await storage.setOnboardingDone();
+    await storage.setModelTier(_recommendedModel);
+
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const ChatScreen()),
+    );
+  }
+}
