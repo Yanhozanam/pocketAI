@@ -117,7 +117,7 @@ jobs:
           } > "$LLAMAFU_BUILD"
 
           # Also patch llamafu's CMakeLists.txt to disable GGML_STATIC (incompatible with NDK 27+)
-          LLAMAFU_CMAKE="$(dirname "$(dirname "$LLAMAFU_BUILD")")/src/main/cpp/CMakeLists.txt"
+          LLAMAFU_CMAKE="$(dirname "$LLAMAFU_BUILD")/src/main/cpp/CMakeLists.txt"
           echo "Patching CMakeLists.txt at: $LLAMAFU_CMAKE"
           sed -i 's/set(GGML_STATIC ON)/set(GGML_STATIC OFF)/' "$LLAMAFU_CMAKE"
 
