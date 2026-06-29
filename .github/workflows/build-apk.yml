@@ -119,25 +119,45 @@ jobs:
           EOF
 
           # Patch llamafu's CMakeLists.txt: disable GGML_STATIC, disable common (avoids server-context),
-          # disable tools (add mtmd directly via add_subdirectory instead)
+          # disable tools, add mtmd sources directly to the target
           LLAMAFU_CMAKE="$(dirname "$LLAMAFU_BUILD")/src/main/cpp/CMakeLists.txt"
           echo "Patching CMakeLists.txt at: $LLAMAFU_CMAKE"
           sed -i 's/set(GGML_STATIC ON)/set(GGML_STATIC OFF)/' "$LLAMAFU_CMAKE"
           sed -i '/^set(LLAMA_BUILD_EXAMPLES OFF)/a set(LLAMA_CURL OFF)' "$LLAMAFU_CMAKE"
           sed -i '/^set(LLAMA_BUILD_EXAMPLES OFF)/a set(LLAMA_BUILD_TOOLS OFF)' "$LLAMAFU_CMAKE"
           sed -i '/^set(LLAMA_BUILD_EXAMPLES OFF)/a set(LLAMA_BUILD_COMMON OFF)' "$LLAMAFU_CMAKE"
-          sed -i '/^add_subdirectory.*EXCLUDE_FROM_ALL/a add_subdirectory(${LLAMA_CPP_DIR}/tools/mtmd mtmd)' "$LLAMAFU_CMAKE"
-          sed -i '/^        ggml$/a\        mtmd' "$LLAMAFU_CMAKE"
+          # Remove any add_subdirectory or mtmd linker references from previous approaches
+          sed -i '/add_subdirectory.*mtmd/d' "$LLAMAFU_CMAKE"
+          sed -i '/^        mtmd$/d' "$LLAMAFU_CMAKE"
 
           # Patch llama-mmap.cpp for NDK 27: posix_madvise -> madvise
           LLAMA_MMAP="$LLAMA_CPP_DIR/src/llama-mmap.cpp"
           echo "Patching llama-mmap.cpp at: $LLAMA_MMAP"
           sed -i 's/posix_madvise/madvise/g; s/POSIX_MADV_WILLNEED/MADV_WILLNEED/g; s/POSIX_MADV_RANDOM/MADV_RANDOM/g' "$LLAMA_MMAP"
 
-          # Patch mtmd CMakeLists.txt: LLAMA_INSTALL_VERSION is not set in this build
-          MTMD_CMAKE="$LLAMA_CPP_DIR/tools/mtmd/CMakeLists.txt"
-          echo "Patching mtmd CMakeLists.txt at: $MTMD_CMAKE"
-          sed -i 's/VERSION ${LLAMA_INSTALL_VERSION}/VERSION "0.0.0"/' "$MTMD_CMAKE"
+          # Add mtmd sources directly to the llamafu target (same approach as the root CMakeLists.txt)
+          # This avoids needing mtmd's own CMakeLists.txt which has dependency issues in subdirectory builds
+          cat >> "$LLAMAFU_CMAKE" << 'CMAKEOF'
+          # Multimodal support source files from llama.cpp/tools/mtmd
+          target_sources(llamafu PRIVATE
+              ${LLAMA_CPP_DIR}/tools/mtmd/clip.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/mtmd-audio.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/mtmd-helper.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/cogvlm.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/conformer.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/glm4v.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/internvl.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/kimivl.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/llama4.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/llava.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/minicpmv.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/pixtral.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/qwen2vl.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/qwen3vl.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/siglip.cpp
+              ${LLAMA_CPP_DIR}/tools/mtmd/models/whisper-enc.cpp
+          )
+          CMAKEOF
 
       - name: Build APK
         run: flutter build apk --release
