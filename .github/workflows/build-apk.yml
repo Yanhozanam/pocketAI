@@ -126,6 +126,8 @@ jobs:
           sed -i '/^set(LLAMA_BUILD_EXAMPLES OFF)/a set(LLAMA_CURL OFF)' "$LLAMAFU_CMAKE"
           sed -i '/^set(LLAMA_BUILD_EXAMPLES OFF)/a set(LLAMA_BUILD_TOOLS OFF)' "$LLAMAFU_CMAKE"
           sed -i '/^set(LLAMA_BUILD_EXAMPLES OFF)/a set(LLAMA_BUILD_COMMON OFF)' "$LLAMAFU_CMAKE"
+          # Add vendor include path for miniaudio.h (needed by mtmd-helper.cpp)
+          sed -i '/${LLAMA_CPP_DIR}\/tools\/mtmd/a\    ${LLAMA_CPP_DIR}\/vendor' "$LLAMAFU_CMAKE"
           # Remove any add_subdirectory or mtmd linker references from previous approaches
           sed -i '/add_subdirectory.*mtmd/d' "$LLAMAFU_CMAKE"
           sed -i '/^        mtmd$/d' "$LLAMAFU_CMAKE"
