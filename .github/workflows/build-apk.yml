@@ -48,7 +48,7 @@ jobs:
           echo "Cloning llama.cpp (pinned to $LLAMA_COMMIT) to: $CPP_DIR"
           git init "$CPP_DIR"
           cd "$CPP_DIR"
-          git remote add origin https://github.com/ggml-org/llama.cpp
+          git remote add origin https://github.com/ggml-org/llama.cpp 2>/dev/null || git remote set-url origin https://github.com/ggml-org/llama.cpp
           git fetch --depth 1 origin "$LLAMA_COMMIT"
           git checkout FETCH_HEAD
           cd -
