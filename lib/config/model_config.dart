@@ -1,11 +1,11 @@
 class ModelConfig {
-  static const String modelName = 'PocketAI Gemma 4 E2B';
+  static const String modelName = 'BeSmartAI Qwen2.5';
   static const String version = '1.0.0';
   static const String downloadUrl =
-      'https://huggingface.co/unsloth/gemma-4-E2B-it-qat-GGUF/resolve/main/gemma-4-E2B-it-qat-UD-Q2_K_XL.gguf';
-  static const String fileName = 'gemma-4-E2B-it-qat-UD-Q2_K_XL.gguf';
+      'https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf';
+  static const String fileName = 'qwen2.5-1.5b-instruct-q4_k_m.gguf';
   static const String sha256 = 'skip_for_now';
-  static const int expectedSizeBytes = 2194728960;
+  static const int expectedSizeBytes = 1202590848;
 
   static const int recommendedThreads = 4;
   static const int contextSize = 2048;

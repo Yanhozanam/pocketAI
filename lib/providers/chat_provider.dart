@@ -86,19 +86,19 @@ class ChatProvider extends ChangeNotifier {
 
   String _buildPrompt(String userMessage, List<Message> history) {
     final buffer = StringBuffer();
-    buffer.writeln('<start_of_turn>user');
-    buffer.writeln('You are PocketAI, a helpful offline study assistant for university students. Be concise, clear, and helpful.<end_of_turn>');
+    buffer.writeln('<|system|>');
+    buffer.writeln('You are BeSmartAI, a helpful offline study assistant for university students. Be concise, clear, and helpful.<|end|>');
 
     final context = history.length > 1 ? history.sublist(0, history.length - 1) : <Message>[];
     for (final msg in context.reversed.take(10).toList().reversed) {
-      final role = msg.isUser ? 'user' : 'model';
-      buffer.writeln('<start_of_turn>$role');
-      buffer.writeln('${msg.content}<end_of_turn>');
+      final role = msg.isUser ? 'user' : 'assistant';
+      buffer.writeln('<|$role|>');
+      buffer.writeln('${msg.content}<|end|>');
     }
 
-    buffer.writeln('<start_of_turn>user');
-    buffer.writeln('$userMessage<end_of_turn>');
-    buffer.writeln('<start_of_turn>model');
+    buffer.writeln('<|user|>');
+    buffer.writeln('$userMessage<|end|>');
+    buffer.writeln('<|assistant|>');
     return buffer.toString();
   }
 
@@ -107,8 +107,8 @@ class ChatProvider extends ChangeNotifier {
       case 'pocketIdentity':
         final lang = _storage.getLanguage();
         return lang == 'fr'
-            ? "Je suis PocketAI, votre compagnon d'étude hors ligne conçu pour les étudiants."
-            : "I'm PocketAI, your offline study companion built for students.";
+            ? "Je suis BeSmartAI, votre compagnon d'étude hors ligne conçu pour les étudiants."
+            : "I'm BeSmartAI, your offline study companion built for students.";
       case 'biuIdentity':
         final lang = _storage.getLanguage();
         return lang == 'fr'
@@ -117,13 +117,13 @@ class ChatProvider extends ChangeNotifier {
       case 'notChatGPT':
         final lang = _storage.getLanguage();
         return lang == 'fr'
-            ? 'Non, je suis PocketAI — un assistant hors ligne conçu pour les étudiants.'
-            : "No, I'm PocketAI — an offline assistant designed for students.";
+            ? 'Non, je suis BeSmartAI — un assistant hors ligne conçu pour les étudiants.'
+            : "No, I'm BeSmartAI — an offline assistant designed for students.";
       case 'mockResponse':
         final lang = _storage.getLanguage();
         return lang == 'fr'
-            ? "C'est une excellente question ! En tant que PocketAI, je suis là pour vous aider dans vos études. Je peux vous aider avec des explications, des résumés et des conseils d'étude. Sur quelle matière travaillez-vous ?"
-            : "That's a great question! As PocketAI, I'm here to help you with your studies. I can assist with explanations, summaries, and study tips. What subject are you working on?";
+            ? "C'est une excellente question ! En tant que BeSmartAI, je suis là pour vous aider dans vos études. Je peux vous aider avec des explications, des résumés et des conseils d'étude. Sur quelle matière travaillez-vous ?"
+            : "That's a great question! As BeSmartAI, I'm here to help you with your studies. I can assist with explanations, summaries, and study tips. What subject are you working on?";
       default:
         return key;
     }

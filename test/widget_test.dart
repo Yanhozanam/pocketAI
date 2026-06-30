@@ -1,31 +1,31 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'package:pocket_ai/main.dart';
+import 'package:be_smart_ai/main.dart';
 
 class FakePathProvider with MockPlatformInterfaceMixin implements PathProviderPlatform {
   @override
   Future<String?> getApplicationDocumentsPath() async {
-    return '${Directory.systemTemp.path}/pocketai_test';
+    return '/besmartai_test';
   }
 
   @override
   Future<String?> getTemporaryPath() async {
-    return '${Directory.systemTemp.path}/pocketai_test_tmp';
+    return '/besmartai_test_tmp';
   }
 
   @override
   Future<String?> getApplicationSupportPath() async {
-    return '${Directory.systemTemp.path}/pocketai_test';
+    return '/besmartai_test';
   }
 
   @override
   Future<String?> getLibraryPath() async {
-    return '${Directory.systemTemp.path}/pocketai_test';
+    return '/besmartai_test';
   }
 
   @override
@@ -42,7 +42,7 @@ class FakePathProvider with MockPlatformInterfaceMixin implements PathProviderPl
 
   @override
   Future<String?> getApplicationCachePath() async {
-    return '${Directory.systemTemp.path}/pocketai_test_cache';
+    return '/besmartai_test_cache';
   }
 }
 
@@ -53,15 +53,15 @@ void main() {
 
   testWidgets('App launches and shows download screen when model missing',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const PocketAIApp());
+    await tester.pumpWidget(const BeSmartAIApp());
     await tester.pump();
 
-    expect(find.text('Setting up PocketAI'), findsOneWidget);
+    expect(find.text('Setting up BeSmartAI'), findsOneWidget);
   });
 
-  testWidgets('Download screen shows PocketAI branding',
+  testWidgets('Download screen shows BeSmartAI branding',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const PocketAIApp());
+    await tester.pumpWidget(const BeSmartAIApp());
     await tester.pump();
 
     expect(find.byIcon(Icons.auto_awesome), findsOneWidget);

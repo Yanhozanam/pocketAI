@@ -173,5 +173,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: pocket-ai-apk
+          name: besmartai-apk
           path: build/app/outputs/flutter-apk/*.apk

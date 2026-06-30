@@ -1,4 +1,4 @@
-name: pocket_ai
+﻿name: be_smart_ai
 description: Your offline study companion
 publish_to: 'none'
 version: 1.0.0+1
@@ -14,8 +14,6 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.2
   llamafu: ^0.1.0
-
-
 
 dev_dependencies:
   flutter_test:

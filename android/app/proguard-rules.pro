@@ -1,2 +1,1 @@
--keep class com.pocketai.app.** { *; }
--keep class com.horcrux.svg.** { *; }
+-keep class com.besmartai.app.** { *; }-keep class com.horcrux.svg.** { *; }
