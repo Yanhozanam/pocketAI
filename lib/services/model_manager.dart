@@ -94,6 +94,11 @@ class ModelManager {
       int startByte = 0;
       if (await partialFile.exists()) {
         startByte = await partialFile.length();
+        if (startByte >= ModelConfig.expectedSizeBytes - 1024) {
+          await partialFile.rename(modelFile.path);
+          await _loadModel();
+          return;
+        }
       }
 
       final client = HttpClient();
